@@ -1,0 +1,24 @@
+aaa: bbb ccc ddd
+bbb: fff ggg hhh
+ccc: fff ggg
+ddd: eee fff ggg
+eee: lll kkk jjj
+fff: lll jjj
+ggg: kkk jjj iii
+hhh: jjj iii
+iii: ooo
+jjj: ooo nnn
+kkk: mmm nnn
+lll: mmm
+mmm: qqq rrr sss
+nnn: qqq rrr
+ooo: ppp qqq
+ppp: xxx
+qqq: www vvv uuu xxx
+rrr: vvv uuu ttt
+sss: ttt
+xxx: yyy
+www: yyy
+vvv: yyy
+uuu: yyy
+ttt: yyy

@@ -1,0 +1,28 @@
+svr: aaa bbb
+aaa: ccc ddd
+bbb: ddd eee
+ccc: fff
+ddd: fff ggg
+eee: ggg
+fff: fft vvv
+ggg: fft www
+fft: hhh iii
+hhh: jjj kkk
+iii: kkk lll
+jjj: mmm
+kkk: mmm nnn
+lll: nnn
+mmm: dac xxx
+nnn: dac yyy
+dac: ooo ppp
+ooo: qqq rrr
+ppp: rrr sss
+qqq: ttt
+rrr: ttt uuu
+sss: uuu
+ttt: out
+uuu: out
+vvv: hhh
+www: iii
+xxx: ooo
+yyy: ppp
