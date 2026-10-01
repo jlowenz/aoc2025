@@ -28,27 +28,6 @@ official text.
 
 ## Completeness
 
-All 24 stars. Every `main` prints both answers and all twelve build under `stack build`.
-Caveats:
+All 24 stars. Every `main` prints both answers (somewhere) and all twelve build under `stack build`. 
 
-- **04** — part 1's answer scrolls past `clearAllAccessibleRolls`'s `Cleared N` trace.
-- **07** — reads `day7.txt`, not `input.txt` like every other day.
-- **08** — part 1 prints a component count (should be 3) ahead of its answer.
-- **09** — `main` prints `rArea`; `part1`/`part2` still return the whole `Rect`.
-- **10** — answers are buried in GLPK solver progress and a per-machine dump.
-- **11** — `main` calls `countPaths` directly; `Lib`'s `part1`/`part2` stay exploratory,
-  dumping the graph and a dozen diagnostic tuples.
-- **12** — a single pass answers both stars.
-
-### Day 08: two aggregation strategies
-
-Both parts merge components, but stop differently — which is why adapting the code in
-place had quietly broken part 1:
-
-- `aggregateAll` (part 1) merges the `maxPairs = 1000` shortest pairs with no early
-  exit; the answer is the product of the three largest component sizes.
-- `aggregate` (part 2) walks all 499,500 distances and stops once one component spans
-  every point, reporting the pair that completed it.
-
-`Q.take k` reads off the k closest pairs directly. The old `prune` helper was abandoned
-because `Q.drop 1` on a min-queue drops the *closest* pair, not the furthest.
+Code is not even close to a production state; often exploratory and definitely messy. 
