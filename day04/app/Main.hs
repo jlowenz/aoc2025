@@ -15,6 +15,10 @@ main :: IO ()
 main = do
     layout <- readData "input.txt"
     let l = makeMatrix layout
+    -- part 1
+    accessible <- findAccessibleRolls l
+    reachable <- countRolls accessible
+    putStrLn $ show reachable
+    -- part 2
     rolls <- clearAllAccessibleRolls 0 l
     putStrLn $ show rolls
-

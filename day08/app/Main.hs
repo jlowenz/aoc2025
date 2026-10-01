@@ -1,6 +1,10 @@
 module Main (main) where
 
-import Lib
+import Lib (part1, part2)
 
 main :: IO ()
-main = part1 "input.txt"
+main = do
+    -- part 1
+    part1 "input.txt"
+    -- part 2
+    part2 "input.txt"

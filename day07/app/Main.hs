@@ -4,4 +4,7 @@ import Lib
 
 main :: IO ()
 main = do
-    putStrLn "Hello"
+    -- part 1
+    part1
+    -- part 2
+    part2

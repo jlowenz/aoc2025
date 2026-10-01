@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Lib (
-    someFunc, buildGraph, stringToNode, nodeToString, part1, part2, testPart1, test, doDfs, loadGraph) 
+    someFunc, buildGraph, stringToNode, nodeToString, countPaths, part1, part2, testPart1, test, doDfs, loadGraph) 
     where
 
 import Debug.Trace (trace)

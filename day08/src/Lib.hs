@@ -1,14 +1,15 @@
-module Lib where
+module Lib (
+    part1, part2
+)
+where
 
-import Control.Monad (foldM, forM_)
+import Control.Monad (foldM)
 import qualified Data.Array as A
 import qualified Data.IORef as R
 import Data.List.Split (splitOn)
 import qualified Data.Map as M 
 import qualified Data.Set as S
 import qualified Data.PQueue.Prio.Min as Q
-import qualified Data.PQueue.Min as Min
-import GHC.Base (Double, undefined)
 
 data Point3 = P3 Int Int Int
     deriving (Show, Eq, Ord)
@@ -29,6 +30,7 @@ readPoints content = A.listArray (1,n) $ (Prelude.map toPoint) $ Prelude.map (sp
         n = length ls
         toPoint :: [String] -> Point3
         toPoint [x,y,z] = P3 (read x) (read y) (read z)
+        toPoint _ = undefined -- anything other than a triplet is unexpected
 
 
 type PointPair = (Int,Int)
@@ -37,8 +39,10 @@ type DistQueue = Q.MinPQueue Double PointPair
 maxPairs :: Int
 maxPairs = 1000
 
--- prune :: DistQueue -> DistQueue
--- prune q = if Q.size q > maxPairs then Q.drop 1 q else q
+-- | The k shortest connections, closest first. Part 1 only connects these;
+-- part 2 needs every distance, so it walks the whole queue instead.
+shortestPairs :: Int -> DistQueue -> [PointPair]
+shortestPairs k = map snd . Q.take k
 
 addPt :: PointPair -> Points -> DistQueue -> DistQueue
 addPt pr@(i,j) pts q = Q.insert d pr q
@@ -96,8 +100,8 @@ insertItems ((i,c):xs) m = insertItems xs (M.insert i c m)
 
 type AggResult = (PtMap, PointPair)
 
--- Aggregate pairs
--- Until we find a full component of size n
+-- | Part 2: connect pairs until one component spans all n points, returning
+-- the pair that completed it. Everything after that pair is skipped.
 aggregate :: Int -> DistQueue -> IO AggResult
 aggregate n = foldM go (M.empty, (-1,-1))
     where 
@@ -136,6 +140,37 @@ aggregate n = foldM go (M.empty, (-1,-1))
                             return $ if sz == n then (newm, (i,j)) else (newm, (-1,-1))
         go result _ = return result -- skip all additional processing
 
+-- | Part 1: connect every pair given, with no early exit, and return the
+-- resulting index -> component map. Points in no pair are absent from the map.
+aggregateAll :: [PointPair] -> IO PtMap
+aggregateAll = foldM go M.empty
+    where
+        go :: PtMap -> PointPair -> IO PtMap
+        go m (i,j) = case (M.lookup i m, M.lookup j m) of
+            (Nothing, Nothing) -> do
+                c <- newComponent (i,j)
+                return $ insertItems [(i,c),(j,c)] m
+            (Just c, Nothing) -> do
+                _ <- addToComponent j c
+                return $ M.insert j c m
+            (Nothing, Just c) -> do
+                _ <- addToComponent i c
+                return $ M.insert i c m
+            -- merge the smaller component into the larger, then repoint every
+            -- index that referred to the smaller one
+            (Just ci, Just cj) -> do
+                iSize <- compSize ci
+                jSize <- compSize cj
+                if iSize >= jSize
+                    then do
+                        (newC, _) <- mergeComponents ci cj
+                        jset <- R.readIORef cj
+                        return $ updateMap m jset newC
+                    else do
+                        (newC, _) <- mergeComponents cj ci
+                        iset <- R.readIORef ci
+                        return $ updateMap m iset newC
+
 -- Support "identified" components
 -- Component could have been a more defined item
 -- then we wouldn't necessarily need this (refactor?)
@@ -159,6 +194,7 @@ type CompQueue = S.Set CompId
 numComponents :: Int
 numComponents = 3
 
+pruneC :: CompQueue -> CompQueue
 pruneC q = if S.size q > numComponents then S.deleteMin q else q
 
 findMaxComponents :: PtMap -> IO CompQueue
@@ -179,10 +215,8 @@ part1 :: String -> IO ()
 part1 fname = do
     contents <- readFile fname
     let rawPts = readPoints contents
-        (_,n) = A.bounds rawPts
-    (pts, (i,j)) <- aggregate n $ findMinPairs $ rawPts
+    pts <- aggregateAll $ shortestPairs maxPairs $ findMinPairs $ rawPts
     maxComps <- findMaxComponents pts
-    putStrLn $ show $ S.size maxComps
     putStrLn $ show $ S.fold (\(CompId _ sz _) acc -> acc * sz) 1 maxComps
 
 part2 :: String -> IO ()
@@ -190,7 +224,7 @@ part2 fname = do
     contents <- readFile fname
     let rawPts = readPoints contents
         (_,n) = A.bounds rawPts
-    (pts, (i,j)) <- aggregate n $ findMinPairs $ rawPts
+    (_, (i,j)) <- aggregate n $ findMinPairs $ rawPts
     putStrLn $ show $ multFirst rawPts i j
     -- maxComps <- findMaxComponents pts
     -- putStrLn $ show $ S.size maxComps
